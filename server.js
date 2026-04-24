@@ -63,11 +63,10 @@ function createServer() {
   });
 }
 
-function main() {
+function main(server) {
   assertRequiredEnv("PIPEDRIVE_API_TOKEN");
   assertRequiredEnv("PIPEDRIVE_PROXY_API_TOKEN");
 
-  const server = createServer();
   server.listen(PORT, HOST, () => {
     console.log("Live proxy listening on http://" + HOST + ":" + PORT);
     console.log("Health: http://127.0.0.1:" + PORT + "/health");
@@ -75,10 +74,11 @@ function main() {
   });
 }
 
+const server = createServer();
+
 if (require.main === module) {
-  main();
+  main(server);
 }
 
-module.exports = {
-  createServer
-};
+module.exports = server;
+module.exports.createServer = createServer;
