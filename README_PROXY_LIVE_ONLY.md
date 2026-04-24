@@ -23,6 +23,7 @@ O que mudou para performance:
 - buscas enriquecidas passam a buscar detalhes em paralelo com limite de concorrencia
 - metadados, detalhes de deals e respostas upstream usam cache em memoria por instancia
 - respostas GET bem-sucedidas enviam `CDN-Cache-Control`/`Vercel-CDN-Cache-Control`
+- o payload padrao de busca agora e enxuto para IA: sem `item`, sem `ai_context` e sem objetos `custom_fields*`
 
 Variaveis obrigatorias na Vercel:
 
@@ -54,6 +55,22 @@ Tambem e possivel trocar `api_token` por header:
 ```text
 Authorization: Bearer {PROXY_TOKEN}
 ```
+
+Busca combinada:
+
+```text
+https://SEU_PROJETO.vercel.app/api/v2/deals/search?property_code=8444411844190&email=cliente%40exemplo.com&limit=1
+```
+
+Parametros combinaveis:
+
+- `property_code`
+- `email`
+- `cpf`
+- `cnpj`
+- `document` ou `documento`
+
+Quando dois ou mais parametros forem enviados, a proxy cruza os criterios e retorna apenas deals que aparecem em todos eles.
 
 Deploy rapido:
 
@@ -235,27 +252,59 @@ Checklist rapido:
 
 ## Payload Enxuto Para IA
 
-Na versao live-only, o payload enriquecido passa a priorizar as estruturas legiveis.
+Na versao Vercel, o retorno de `/api/v2/deals/search` passa a priorizar um payload curto e legivel.
 
-Fica no payload:
+Fica no item de busca:
 
-- `deal.custom_fields_readable`
-- `deal.ai_summary`
+- `deal`
+- `matched_by`
+- `search_term_normalized`
+- `correlation_found`
+- `result_score`, quando existir
+
+Sai do payload:
+
+- `item`
 - `ai_context`
-- `data.search_trace` no retorno de `/api/v2/deals/search`
-- `matched_by`, `search_term_normalized` e `correlation_found` em cada item de busca
-
-Sai do payload final da deal:
-
+- `deal.ai_summary`
 - `deal.custom_fields`
+- `deal.custom_fields_readable`
 - `deal.custom_fields_meta`
 - `deal.custom_fields_by_name`
 - `deal.custom_fields_raw_by_name`
 
-Observacao:
+O objeto `deal` fica neste formato geral:
 
-- internamente a proxy ainda pode usar essas estruturas tecnicas para montar o enriquecimento
-- externamente a resposta fica mais enxuta para consumo indireto por prompt JSON
+```json
+{
+  "id": 123,
+  "title": "...",
+  "status": "open",
+  "property_code": "8444411844190",
+  "person_name": "...",
+  "pipeline": {"id": 5, "name": "PRÉ ARREMATAÇÃO"},
+  "stage": {"id": 105, "name": "..."},
+  "updated_at": "2026-03-13T15:32:13Z",
+  "fields": {
+    "Endereço": "...",
+    "Valor: Total da Proposta": {"value": 100000, "currency": "BRL"}
+  },
+  "workflow": {
+    "statuses": {"Triagem": "Em andamento"},
+    "completion_dates": {"Triagem": "2026-01-10"}
+  },
+  "notes": [
+    {"id": 1, "value": "Texto da nota"}
+  ]
+}
+```
+
+Regras de campos:
+
+- `workflow.statuses` recebe somente campos `Status: {{ETAPA}}`
+- `workflow.completion_dates` recebe somente campos `Data término: {{ETAPA}}`
+- `fields` recebe apenas campos unicos ou coringas relevantes, como endereco, matricula, valores, dados do imovel e dados principais do arrematante
+- campos vazios, nulos e objetos tecnicos ficam ocultos
 
 ### Rastreabilidade da correlacao
 
