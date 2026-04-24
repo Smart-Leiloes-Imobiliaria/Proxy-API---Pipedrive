@@ -1,0 +1,14 @@
+{
+  "name": "api-zendesk-vercel-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pipedrive readonly proxy optimized for Vercel Node functions.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "check": "node --check server.js && node --check lib/pipedrive-live-proxy.js && node --check api/proxy.mjs"
+  }
+}
