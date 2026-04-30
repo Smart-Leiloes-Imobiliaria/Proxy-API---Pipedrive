@@ -1,3 +1,5 @@
+// Production Realase Vercel - Davi Vieira 30/04/2026
+
 /*
 Standalone Apps Script Web App for a live Pipedrive readonly proxy.
 
