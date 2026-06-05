@@ -1,0 +1,119 @@
+Campo:
+	E-mail do Arrematante -> 720d2207af311eff3c9f6fc143aeb25ce7a19b35
+
+Campo:
+	Telefone do Arremtante -> 534ddc592e7b7db4b6d6faff0d07f2071684039e
+
+---
+
+Campo:
+	Atribuído: Análise Básica -> 73d5e4a4acdddf6759fc7d6a2f310116d9c838f3
+Opções do campo:
+	ID: 377 -> Maria Prata
+	ID: 378 -> Graziele Rosa
+	ID: 383 -> Gabriel Romano
+	ID: 399 -> N/A
+	ID: 767 -> Lívia Duarte
+	ID: 996 -> Isabella Lages
+	ID: 1371 -> Rayssa Regis
+	ID: 1440 -> Raissa Lopes
+	ID: 1825 -> Davi Parma
+	ID: 1886 -> Igor Rafael
+	ID: 1892 -> Ana Duarte
+	ID: 1893 -> Daniel Moreira
+	ID: 1895 -> Israel Carmo
+	ID: 1988 -> Blenda Fonseca
+	ID: 2065 -> Davi Vieira
+	ID: 2067 -> Tatiane Gomes
+	ID: 2132 -> Luisa Machado
+	ID: 2150 -> Amanda Pereira
+	ID: 2151 -> Lucas Marx
+	ID: 2536 -> Vinicius Cavalcanti
+	ID: 2538 -> Gabriel Max
+	ID: 2619 -> Gabrielle Arvelos
+
+Campo: 
+	Status: Análise Básica -> 500817fc0d51dd925505281d99b0e21b1ae4beb6
+Opções de campo:
+	ID: 294 -> Análise do Laudo em Andamento
+	ID: 295 -> Análise da Matricula em Andamento
+	ID: 297 -> Análise Básica Finalizada
+	ID: 1253 -> n/a
+
+---
+
+Campo:
+	Atribuído: Análise Jurídica -> ab4066f405319986f4179c21733a41887c68ad52
+Opções do campo:
+	ID: 665 -> n/a
+	ID: 713 -> Kauã Amorim
+	ID: 764 -> Lívia Duarte
+	ID: 1068 -> Rayssa Regis
+	ID: 1512 -> Bruna Pimentel
+	ID: 1519 -> Gabriel Romano
+	ID: 1636 -> Blenda Fonseca
+	ID: 2068 -> Evelyn Silva
+	ID: 2463 -> Maria Prata
+	ID: 2464 -> Luisa Machado
+	ID: 2465 -> Raissa Lopes
+	ID: 2718 -> Glória de Oliveira
+
+Campo:
+	Status: Analise Jurídica -> 77670428dd5e8eac1bfb889a833810e86dae18e7
+Opções de campo:
+	ID: 219 -> Consultar ações no TRF do Estado
+	ID: 222 -> Baixar ações e analisar
+	ID: 223 -> Finalizado
+	ID: 245 -> n/a
+
+---
+
+Campo:
+	Atribuído: Análise de Mercado -> 01776e9fd027b30f1302a306367edaa4b1472eac
+Opções do campo:
+	ID: 384 -> Maria Prata
+	ID: 385 -> Graziele Rosa
+	ID: 390 -> Gabriel Romano
+	ID: 400 -> N/A
+	ID: 1441 -> Raissa Lopes
+	ID: 1639 -> Isabella Lages
+	ID: 1888 -> Igor Rafael
+	ID: 2061 -> Tatiane Gomes
+	ID: 2153 -> Amanda Pereira
+	ID: 2154 -> Lucas Marx
+	ID: 2620 -> Gabrielle Arvelos
+
+Campo:
+	Status: Analise de mercado -> 4e48e3f6c03f9a6c65e008eaf88d5bdba50186f6
+Opções do campo:
+	ID: 215 -> Finalizada
+	ID: 244 -> n/a
+	ID: 1048 -> Não Finalizada
+	ID: 1271 -> Em andamento
+
+---
+
+Campo:
+	Atribuído: Diligência - Pré Arrematação -> e1325020945e6e3cfa48ec3a8eabe213b721db74
+Opções do campo:
+	ID: 751 -> Graziele Rosa
+	ID: 752 -> Isadora Pimenta
+	ID: 753 -> Maria Prata
+	ID: 1254 -> n/a
+	ID: 1640 -> Raissa Lopes
+	ID: 1641 -> Blenda Fonseca
+	ID: 1642 -> Isabella Lages
+	ID: 2060 -> Tatiane Gomes
+	ID: 2155 -> Lucas Marx
+	ID: 2156 -> Amanda Pereira
+	ID: 2621 -> Gabrielle Arvelos
+
+Campo: 
+	Status: Diligência - Pré Arrematação -> ec7310083cda13f3acdd6c050d9ebceaeea0628b
+Opções do campo:
+	ID: 871 -> Finalizada
+	ID: 872 -> Em andamento
+	ID: 873 -> n/a
+	ID: 1118 -> Solicitada
+
+
