@@ -9,6 +9,6 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "check": "node --check server.js && node --check lib/pipedrive-live-proxy.js && node --check lib/chatapp-triagem.js && node --check api/proxy.mjs && node --check api/chatapp/verificar-triagem.mjs"
+    "check": "node --check server.js && node --check lib/pipedrive-live-proxy.js && node --check lib/chatapp-triagem.js && node --check lib/chatapp-direcionamento.js && node --check api/proxy.mjs && node --check api/chatapp/verificar-triagem.mjs && node --check api/chatapp/verificar-triagem-direcionamento.mjs && node --check test/chatapp-direcionamento.test.js && node test/chatapp-direcionamento.test.js"
   }
 }
