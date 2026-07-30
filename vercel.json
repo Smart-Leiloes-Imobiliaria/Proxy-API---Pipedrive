@@ -9,6 +9,9 @@
     },
     "api/chatapp/verificar-triagem-direcionamento.mjs": {
       "maxDuration": 30
+    },
+    "api/chatapp/verificar-triagem-funis.mjs": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
