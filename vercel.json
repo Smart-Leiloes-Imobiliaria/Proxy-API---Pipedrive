@@ -12,6 +12,9 @@
     },
     "api/chatapp/verificar-triagem-funis.mjs": {
       "maxDuration": 30
+    },
+    "api/chatapp/rotear-funil.mjs": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
