@@ -11,6 +11,7 @@
 // futuro) e apenas ENCAMINHA para o mesmo handler do proxy, sem duplicar
 // logica.
 
+// teste: commit de validacao do deploy automatico apos reconexao do Git na Vercel
 import proxy from "../../lib/pipedrive-live-proxy.js";
 
 export default {
