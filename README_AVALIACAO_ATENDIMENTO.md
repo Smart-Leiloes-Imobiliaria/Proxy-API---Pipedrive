@@ -132,8 +132,9 @@ nota. Telefones, e-mails e CPFs evidentes são removidos do transcript enviado �
 OpenAI; binários viram um marcador simples. Se mais de um funcionário humano
 responder na conversa, o endpoint avalia até os dois participantes com mais
 mensagens, mantendo o responsável atual como prioridade quando ele participou.
-A chamada Responses usa `store: false` e JSON Schema estrito para `avaliavel` e
-`nota` inteira de 1 a 5.
+A chamada Responses usa `store: false` e JSON Schema estrito para `avaliavel`,
+`nota` inteira de 1 a 5 e uma `justificativa` técnica de até 900 caracteres,
+explicando acertos, erros identificados, impacto no cliente e motivo da nota.
 
 Erros retornam JSON estruturado e logs sem tokens nem transcript. `not_evaluable`
 é um resultado bem-sucedido que não grava linha; os motivos possíveis incluem

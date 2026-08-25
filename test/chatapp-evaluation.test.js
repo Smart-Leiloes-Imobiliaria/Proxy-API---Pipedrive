@@ -108,11 +108,15 @@ async function main() {
     assert.equal(String(url), "https://api.openai.com/v1/responses");
     const body = JSON.parse(options.body);
     assert.equal(body.instructions, "Prompt de arquivo para teste");
-    return { ok: true, status: 200, json: async () => ({ output_text: "{\"avaliavel\":true,\"nota\":4,\"justificativa\":\"ok\"}" }) };
+    assert.equal(body.max_output_tokens, 420);
+    assert.equal(body.text.format.schema.properties.justificativa.maxLength, 900);
+    const detailedReason = "O assessor foi objetivo, cordial e conduziu o cliente com orientação prática. Não houve critério de perda identificado no trecho analisado. A nota reflete atendimento claro, com boa experiência para o cliente e sem falhas relevantes.";
+    return { ok: true, status: 200, json: async () => ({ output_text: JSON.stringify({ avaliavel: true, nota: 4, justificativa: detailedReason }) }) };
   };
   try {
     const resultFromFilePrompt = await clientsWithPromptFile.createServices().evaluate({ responsibleName: "Isaque", transcript: "Teste" });
     assert.equal(resultFromFilePrompt.nota, 4);
+    assert.ok(resultFromFilePrompt.justificativa.includes("Não houve critério de perda"));
   } finally {
     global.fetch = originalFetch;
     fs.unlinkSync(promptFile);
