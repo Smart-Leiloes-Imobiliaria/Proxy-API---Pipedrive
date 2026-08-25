@@ -15,6 +15,9 @@
     },
     "api/chatapp/rotear-funil.mjs": {
       "maxDuration": 30
+    },
+    "api/chatapp/avaliar-atendimento.mjs": {
+      "maxDuration": 55
     }
   },
   "rewrites": [
