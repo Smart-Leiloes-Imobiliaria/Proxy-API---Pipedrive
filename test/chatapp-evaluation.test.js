@@ -88,6 +88,53 @@ async function main() {
     assert.equal(pagedCursor[1].text, "pagina antiga");
   } finally { global.fetch = originalFetchCursor; }
 
+  // Quando a janela de avaliacao e conhecida, a busca deve continuar ate sair da janela, nao ate o primeiro item dentro dela.
+  const originalFetchWindow = global.fetch;
+  let windowCalls = 0;
+  global.fetch = async () => {
+    windowCalls += 1;
+    const page = windowCalls;
+    if (page === 1) {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: {
+            messages: [
+              { text: "mensagem recente", createdAt: "2026-08-25T15:00:00.000Z" },
+              { text: "mensagem dentro da janela", createdAt: "2026-08-25T14:10:00.000Z" }
+            ],
+            nextPage: "page-2"
+          }
+        })
+      };
+    }
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: {
+          messages: [
+            { text: "mensagem no limite da janela", createdAt: "2026-08-25T14:01:00.000Z" },
+            { text: "mensagem fora da janela", createdAt: "2026-08-25T13:00:00.000Z" }
+          ],
+          nextPage: undefined
+        }
+      })
+    };
+  };
+  try {
+    const windowed = await clients.createServices().listMessages({
+      license_id: "l",
+      messenger_type: "m",
+      chat_id: "c",
+      sessionStartedAt: "2026-08-25T14:00:00.000Z",
+      closedAt: "2026-08-25T15:30:00.000Z"
+    });
+    assert.ok(windowed.length >= 3, "deve continuar até a página que ultrapassa o início da janela");
+    assert.equal(windowCalls, 2, "deve buscar a segunda página antes de sair da janela");
+  } finally { global.fetch = originalFetchWindow; }
+
   // O cliente oficial renova token expirado, captura novo access/refresh token
   // e usa o access token novo na chamada de dados.
   delete require.cache[require.resolve("../lib/chatapp-evaluation-clients.js")];
