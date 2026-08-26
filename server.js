@@ -71,6 +71,9 @@ function main(server) {
     console.log("Live proxy listening on http://" + HOST + ":" + PORT);
     console.log("Health: http://127.0.0.1:" + PORT + "/health");
     console.log("Path mode: http://127.0.0.1:" + PORT + "/?path=/api/v2/deals/search&api_token=TOKEN");
+    // Debug flag for detailed ChatApp evaluation logs
+    const dbg = String(process.env.DEBUG_CHATAPP_EVAL || "").trim();
+    console.log("DEBUG_CHATAPP_EVAL=" + (dbg ? dbg : "(disabled)"));
   });
 }
 

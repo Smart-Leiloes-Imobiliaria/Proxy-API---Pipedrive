@@ -177,6 +177,20 @@ async function main() {
   result = await evaluation.handleEvaluation(request({ closed_at: "2026-08-24T15:30:00.000Z" }), fixture.deps);
   assert.equal(fixture.state.records[0].closedAt, "2026-08-24 15:30:00");
 
+  // 12d. Se a janela ajustada nao capturar mensagens humanas, o endpoint
+  // tenta a janela bruta do payload antes de desistir.
+  fixture = services({
+    getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
+    listMessages: async () => [
+      message({ side: "in", text: "Preciso de ajuda", createdAt: "2026-08-25T14:04:00.000Z", fromApp: undefined }),
+      message({ text: "Mensagem humana fora do offset", createdAt: "2026-08-25T14:05:00.000Z", fromApp: { id: "webchat", sender: "employee" }, fromUser: { id: "emp-1", name: "Atendente Externo" } }),
+      message({ text: "/fechar", subtype: "command", createdAt: "2026-08-25T17:06:00.000Z", fromApp: { id: "webchat", sender: "employee" } })
+    ]
+  });
+  result = await evaluation.handleEvaluation(request({ started_at: "2026-08-25T14:01:00.000Z", closed_at: "2026-08-25T14:13:00.000Z" }), fixture.deps);
+  assert.equal(result.payload.status, "saved");
+  assert.equal(result.payload.responsible_name, "Atendente Externo");
+
   // 13. Erro e resposta estruturada; o Scenario deve seguir o caminho de fechamento.
   fixture = services({ getChat: async () => { const error = new Error(); error.code = "chatapp_timeout"; error.statusCode = 504; throw error; } });
   result = await evaluation.handleEvaluation(request(), fixture.deps); assert.equal(result.status, 504); assert.equal(result.payload.success, false);

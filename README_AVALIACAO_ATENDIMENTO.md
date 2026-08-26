@@ -132,6 +132,9 @@ nota. Telefones, e-mails e CPFs evidentes são removidos do transcript enviado �
 OpenAI; binários viram um marcador simples. Se mais de um funcionário humano
 responder na conversa, o endpoint avalia até os dois participantes com mais
 mensagens, mantendo o responsável atual como prioridade quando ele participou.
+A janela do transcript é testada tanto na forma bruta enviada pelo ChatApp
+quanto na forma ajustada pelo offset configurado; o backend usa a que realmente
+preserva mensagens humanas antes de concluir que não há atendimento avaliável.
 A chamada Responses usa `store: false` e JSON Schema estrito para `avaliavel`,
 `nota` inteira de 1 a 5 e uma `justificativa` técnica de até 900 caracteres,
 explicando acertos, erros identificados, impacto no cliente e motivo da nota.
