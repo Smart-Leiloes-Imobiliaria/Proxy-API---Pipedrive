@@ -25,9 +25,11 @@ function services(overrides) {
     getChat: async () => ({ data: { id: "chat-1", name: "Cliente Teste", responsible: { id: "agent-1" }, status: "closed" } }),
     getEmployee: async () => ({ data: { fullName: "Isaque Coelho" } }),
     listMessages: async () => [message({ side: "in", text: "Preciso de ajuda", fromApp: undefined }), message()],
+    listRecords: async () => state.records.map((record) => [record.chatId, record.responsibleName, record.closedAt, record.clientName, record.nota, record.justificativa || ""]),
     evaluate: async () => { state.evaluated += 1; return { avaliavel: true, nota: 4 }; },
     hasRecord: async (chatId, closedAt) => state.records.some((record) => record.chatId === chatId && record.closedAt === closedAt),
     hasEvaluationRecord: async (chatId, closedAt, responsibleName) => state.records.some((record) => record.chatId === chatId && record.closedAt === closedAt && record.responsibleName === responsibleName),
+    appendRecords: async (records) => { state.records.push(...records); },
     appendRecord: async (record) => { state.records.push(record); }
   };
   return { state, deps: Object.assign(base, overrides || {}) };
@@ -164,7 +166,7 @@ async function main() {
   result = await evaluation.handleEvaluation(request(), fixture.deps); assert.equal(result.status, 502); assert.equal(result.payload.error, "invalid_openai_response");
   fixture = services({ evaluate: async () => { const error = new Error(); error.code = "openai_timeout"; error.statusCode = 504; throw error; } });
   result = await evaluation.handleEvaluation(request(), fixture.deps); assert.equal(result.status, 504); assert.equal(result.payload.error, "openai_timeout");
-  fixture = services({ appendRecord: async () => { const error = new Error(); error.code = "google_sheets_http_503"; error.statusCode = 502; throw error; } });
+  fixture = services({ appendRecords: async () => { const error = new Error(); error.code = "google_sheets_http_503"; error.statusCode = 502; throw error; } });
   result = await evaluation.handleEvaluation(request(), fixture.deps); assert.equal(result.status, 502); assert.equal(result.payload.error, "google_sheets_http_503");
 
   // 10/11. Chave de idempotencia e ChatID + horario de fechamento.
@@ -196,13 +198,37 @@ async function main() {
   assert.equal(fixture.state.records.length, 2);
   assert.deepEqual(result.payload.evaluated_employees.map((item) => item.responsible_name), ["Isaque Coelho", "Outra Pessoa"]);
 
-  // 12c. O closed_at recebido do ChatApp e deslocado +3h por padrao antes de
+  // 12c. O caminho rapido usa uma leitura da planilha e avalia os candidatos em paralelo.
+  const started = [];
+  const resolvers = new Map();
+  fixture = services({
+    listMessages: async () => [
+      message({ text: "Resposta principal 1" }),
+      message({ text: "Resposta secundária", fromApp: { sender: { id: "agent-2", fullName: "Outra Pessoa" } } })
+    ],
+    listRecords: async () => [],
+    evaluate: async (input) => new Promise((resolve) => {
+      started.push(input.responsibleName);
+      resolvers.set(input.responsibleName, resolve);
+    }),
+    appendRecords: async (records) => { fixture.state.records.push(...records); }
+  });
+  const inFlight = evaluation.handleEvaluation(request({ closed_at: "2026-08-23T16:00:00.000Z" }), fixture.deps);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(started.length, 2);
+  resolvers.get("Isaque Coelho")({ avaliavel: true, nota: 5, justificativa: "ok" });
+  resolvers.get("Outra Pessoa")({ avaliavel: true, nota: 3, justificativa: "ok" });
+  result = await inFlight;
+  assert.equal(result.payload.status, "saved");
+  assert.equal(fixture.state.records.length, 2);
+
+  // 12d. O closed_at recebido do ChatApp e deslocado +3h por padrao antes de
   // virar chave/display da planilha.
   fixture = services();
   result = await evaluation.handleEvaluation(request({ closed_at: "2026-08-24T15:30:00.000Z" }), fixture.deps);
   assert.equal(fixture.state.records[0].closedAt, "2026-08-24 15:30:00");
 
-  // 12d. Se a janela ajustada nao capturar mensagens humanas, o endpoint
+  // 12e. Se a janela ajustada nao capturar mensagens humanas, o endpoint
   // tenta a janela bruta do payload antes de desistir.
   fixture = services({
     getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
