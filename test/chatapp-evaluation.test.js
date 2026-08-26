@@ -61,6 +61,31 @@ async function main() {
     assert.equal(paged.length, 2); assert.equal(pageCalls, 2);
   } finally { global.fetch = originalFetch; }
 
+  // O cursor opaco `nextPage` do ChatApp tambem precisa ser seguido.
+  const originalFetchCursor = global.fetch;
+  let cursorCalls = 0;
+  global.fetch = async (url, options) => {
+    cursorCalls += 1;
+    const second = String(url).includes("nextPage=");
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: {
+          items: second
+            ? [message({ text: "pagina antiga", createdAt: "2026-08-25T14:05:00.000Z" })]
+            : [message({ text: "pagina recente", createdAt: "2026-08-25T15:05:00.000Z" })],
+          nextPage: second ? undefined : "cursor-opaco-123"
+        }
+      })
+    };
+  };
+  try {
+    const pagedCursor = await clients.createServices().listMessages({ license_id: "l", messenger_type: "m", chat_id: "c" });
+    assert.equal(pagedCursor.length, 2); assert.equal(cursorCalls, 2);
+    assert.equal(pagedCursor[1].text, "pagina antiga");
+  } finally { global.fetch = originalFetchCursor; }
+
   // O cliente oficial renova token expirado, captura novo access/refresh token
   // e usa o access token novo na chamada de dados.
   delete require.cache[require.resolve("../lib/chatapp-evaluation-clients.js")];

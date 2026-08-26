@@ -118,7 +118,7 @@ inerente ao MVP baseado apenas em Sheets.
 
 O proxy obtém chat, responsável e mensagens diretamente da API ChatApp. Ele
 limita o histórico a `closed_at`, segue a paginação de até 100 mensagens por
-página e aceita futuramente `session_started_at` quando houver webhook
+página, inclusive o cursor opaco `nextPage` do ChatApp, e aceita futuramente `session_started_at` quando houver webhook
 `chatStatus`. Por padrão, `closed_at` e `session_started_at` recebem offset de
 `+3h` antes do filtro e da chave salva na planilha, porque o datetime emitido
 pelo ChatApp neste fluxo chega deslocado. Ajuste
