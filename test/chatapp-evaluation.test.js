@@ -135,6 +135,45 @@ async function main() {
     assert.equal(windowCalls, 2, "deve buscar a segunda página antes de sair da janela");
   } finally { global.fetch = originalFetchWindow; }
 
+  // O teto padrao de paginas precisa ser alto o bastante para nao cortar chats longos
+  // antes de a janela com `started_at` ser alcancada.
+  const originalMaxPages = process.env.CHATAPP_MAX_MESSAGE_PAGES;
+  const originalFetchDeep = global.fetch;
+  delete process.env.CHATAPP_MAX_MESSAGE_PAGES;
+  delete require.cache[require.resolve("../lib/chatapp-evaluation-clients.js")];
+  const clientsDeepWindow = require("../lib/chatapp-evaluation-clients.js");
+  let deepCalls = 0;
+  global.fetch = async () => {
+    deepCalls += 1;
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: {
+          messages: [message({ text: "pagina " + deepCalls, createdAt: "2026-08-25T14:10:00.000Z" })],
+          nextPage: deepCalls < 9 ? "page-" + (deepCalls + 1) : undefined
+        }
+      })
+    };
+  };
+  try {
+    const deepWindow = await clientsDeepWindow.createServices().listMessages({
+      license_id: "l",
+      messenger_type: "m",
+      chat_id: "c",
+      sessionStartedAt: "2026-08-01T00:00:00.000Z",
+      closedAt: "2026-08-25T15:30:00.000Z"
+    });
+    assert.equal(deepWindow.length, 9);
+    assert.equal(deepCalls, 9);
+  } finally {
+    global.fetch = originalFetchDeep;
+    if (originalMaxPages == null) delete process.env.CHATAPP_MAX_MESSAGE_PAGES;
+    else process.env.CHATAPP_MAX_MESSAGE_PAGES = originalMaxPages;
+    delete require.cache[require.resolve("../lib/chatapp-evaluation-clients.js")];
+    require("../lib/chatapp-evaluation-clients.js");
+  }
+
   // O cliente oficial renova token expirado, captura novo access/refresh token
   // e usa o access token novo na chamada de dados.
   delete require.cache[require.resolve("../lib/chatapp-evaluation-clients.js")];
