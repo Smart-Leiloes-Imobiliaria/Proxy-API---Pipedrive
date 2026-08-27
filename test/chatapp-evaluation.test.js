@@ -24,7 +24,7 @@ function services(overrides) {
   const base = {
     getChat: async () => ({ data: { id: "chat-1", name: "Cliente Teste", responsible: { id: "agent-1" }, status: "closed" } }),
     getEmployee: async () => ({ data: { fullName: "Isaque Coelho" } }),
-    listMessages: async () => [message({ side: "in", text: "Preciso de ajuda", fromApp: undefined }), message()],
+    listMessages: async () => [message({ side: "in", text: "Preciso de ajuda", fromApp: undefined }), message({ text: "Boa tarde! No que posso ajudar?" })],
     listRecords: async () => state.records.map((record) => [record.chatId, record.responsibleName, record.closedAt, record.clientName, record.nota, record.justificativa || ""]),
     evaluate: async () => { state.evaluated += 1; return { avaliavel: true, nota: 4 }; },
     hasRecord: async (chatId, closedAt) => state.records.some((record) => record.chatId === chatId && record.closedAt === closedAt),
@@ -40,6 +40,7 @@ async function main() {
   let fixture = services();
   let result = await evaluation.handleEvaluation(request(), fixture.deps);
   assert.equal(result.status, 200); assert.equal(result.payload.status, "saved"); assert.equal(fixture.state.records.length, 1);
+  assert.equal(fixture.state.records[0].capturedTexts, "CLIENTE - 12:00 - Preciso de ajuda\nIsaque Coelho - 12:00 - Boa tarde! No que posso ajudar?");
 
   // 2. Mais de 100 mensagens: o builder preserva todas as mensagens validas.
   const many = Array.from({ length: 101 }, (_, index) => message({ text: "Resposta " + index }));
@@ -246,6 +247,7 @@ async function main() {
   // 5/6. Bot e comandos internos sao removidos; apenas o assessor conta.
   transcript = evaluation.buildTranscript([message({ text: "/rotearfunil" }), message({ fromApp: { sender: { id: "bot", name: "ChatApp Bot" } } }), message({ text: "Resposta humana" })], { responsibleId: "agent-1", responsibleName: "Isaque Coelho", sessionClosedAt: CLOSED_AT });
   assert.equal(transcript.targetHumanMessages, 1); assert.ok(!transcript.text.includes("rotearfunil"));
+  assert.ok(transcript.text.includes("CLIENTE") || transcript.text.includes("ASSESSOR"));
 
   // 7/8/9. Falhas de modelo, modelo indisponivel e Sheets indisponivel nao sao sucesso.
   fixture = services({ evaluate: async () => ({ avaliavel: true, nota: 6 }) });
@@ -282,6 +284,8 @@ async function main() {
   result = await evaluation.handleEvaluation(request({ closed_at: "2026-08-23T15:30:00.000Z" }), fixture.deps);
   assert.equal(result.payload.status, "saved");
   assert.equal(fixture.state.records.length, 2);
+  assert.ok(fixture.state.records[0].capturedTexts.includes("Isaque Coelho - 12:00 - Resposta principal 1"));
+  assert.ok(fixture.state.records[0].capturedTexts.includes("Outra Pessoa - 12:00 - Resposta secundaria"));
   assert.deepEqual(result.payload.evaluated_employees.map((item) => item.responsible_name), ["Isaque Coelho", "Outra Pessoa"]);
 
   // 12c. O caminho rapido usa uma leitura da planilha e avalia os candidatos em paralelo.

@@ -134,7 +134,8 @@ modo preferencial para local e Vercel. `EVALUATION_PROMPT` permanece apenas
 como fallback legado. A conta de serviço deve ter acesso de **Editor** à
 planilha e o escopo Google Sheets API precisa estar habilitado no projeto dela.
 Crie a aba configurada já com os cabeçalhos, nesta ordem: `ChatID`, `Nome do
-Responsável`, `Horário`, `Nome do Cliente`, `Nota`, `Justificativa` (A:F).
+Responsável`, `Horário`, `Nome do Cliente`, `Nota`, `Justificativa`,
+`Textos Captados` (A:G).
 
 ## Contratos e proteção de dados
 
@@ -171,6 +172,9 @@ mensagens, mantendo o responsável atual como prioridade quando ele participou.
 A janela do transcript é testada tanto na forma bruta enviada pelo ChatApp
 quanto na forma ajustada pelo offset configurado; o backend usa a que realmente
 preserva mensagens humanas antes de concluir que não há atendimento avaliável.
+A planilha também recebe a coluna `Textos Captados`, preenchida com o mesmo
+recorte filtrado usado pela IA, no formato `Autor - HH:MM - Texto`, uma
+mensagem por linha.
 A chamada Responses usa `store: false` e JSON Schema estrito para `avaliavel`,
 `nota` inteira de 1 a 5 e uma `justificativa` técnica de até 900 caracteres,
 explicando acertos, erros identificados, impacto no cliente e motivo da nota.
