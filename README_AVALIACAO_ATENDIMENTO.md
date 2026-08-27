@@ -26,6 +26,7 @@ Accept: application/json
   "chat_id": "{{id_chat}}",
   "license_id": "{{license_id}}",
   "messenger_type": "{{messenger_type}}",
+  "started_at": "{{started_at}}",
   "closed_at": "{{datetime}}",
   "source": "helper_close"
 }
@@ -66,7 +67,30 @@ continua obrigatório para a execução normal; porém você pode enviar também
 `session_started_at` (ou `started_at`) junto com `closed_at` para reduzir o
 intervalo do transcript e melhorar a precisão da avaliação.
 
-Exemplo de chamada com `closed_at` e `session_started_at`:
+`closed_at`, `session_started_at` e `started_at` aceitam ISO ou o formato
+nativo do ChatApp `DD.MM.YYYY HH:MM:SS`. O formato nativo é interpretado como
+horário local enviado pelo ChatApp e depois passa pelo offset configurado em
+`CHATAPP_EVALUATION_TIME_OFFSET_HOURS`, mantendo compatibilidade com os fluxos
+que ainda enviam ISO.
+
+Exemplo de chamada com o formato nativo do ChatApp:
+
+```bash
+curl -i -X POST http://127.0.0.1:3001/api/chatapp/avaliar-atendimento \
+  -H "Authorization: Bearer SEU_CHATAPP_INTERNAL_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data '{
+    "chat_id": "553195611124",
+    "license_id": "76040",
+    "messenger_type": "caWhatsApp",
+    "started_at": "27.08.2026 09:20:15",
+    "closed_at": "27.08.2026 13:55:50",
+    "source": "helper_close"
+  }'
+```
+
+Exemplo de chamada retrocompatível com `closed_at` e `session_started_at` em
+ISO:
 
 ```bash
 curl -i -X POST http://127.0.0.1:3001/api/chatapp/avaliar-atendimento \
@@ -80,6 +104,16 @@ curl -i -X POST http://127.0.0.1:3001/api/chatapp/avaliar-atendimento \
     "closed_at": "2026-08-24T18:30:00.000Z",
     "source": "helper_close"
   }'
+```
+
+Data inválida retorna erro de validação explícito:
+
+```json
+{
+  "success": false,
+  "error": "invalid_closed_at",
+  "message": "closed_at must be a valid date in ISO format or ChatApp format DD.MM.YYYY HH:MM:SS"
+}
 ```
 
 ## Configuração
@@ -123,6 +157,8 @@ página, inclusive o cursor opaco `nextPage` do ChatApp, e aceita futuramente `s
 `+3h` antes do filtro e da chave salva na planilha, porque o datetime emitido
 pelo ChatApp neste fluxo chega deslocado. Ajuste
 `CHATAPP_EVALUATION_TIME_OFFSET_HOURS=0` se o Scenario passar ISO UTC correto.
+Antes desse ajuste, as datas são normalizadas por um parser único que aceita
+ISO e `DD.MM.YYYY HH:MM:SS` sem inverter dia e mês.
 
 A OpenAI não recebe o payload cru de `/messages`. O backend transforma a lista
 em um transcript normalizado com horários, `CLIENTE`, `ASSESSOR` e

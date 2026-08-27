@@ -314,7 +314,25 @@ async function main() {
   result = await evaluation.handleEvaluation(request({ closed_at: "2026-08-24T15:30:00.000Z" }), fixture.deps);
   assert.equal(fixture.state.records[0].closedAt, "2026-08-24 15:30:00");
 
-  // 12e. Se a janela ajustada nao capturar mensagens humanas, o endpoint
+  // 12e. O formato nativo do ChatApp deve ser aceito sem confundir dia e mes.
+  assert.equal(evaluation.parseChatAppDate_("27.08.2026 13:55:50").toISOString(), "2026-08-27T13:55:50.000Z");
+  assert.equal(evaluation.parseChatAppDate_("08.12.2026 09:20:15").toISOString(), "2026-12-08T09:20:15.000Z");
+  assert.equal(evaluation.parseChatAppDate_("2026-08-27T16:55:50.000Z").toISOString(), "2026-08-27T16:55:50.000Z");
+  assert.equal(evaluation.parseChatAppDate_("32.08.2026 13:55:50"), null);
+
+  fixture = services();
+  result = await evaluation.handleEvaluation(request({ closed_at: "21.08.2026 15:30:00" }), fixture.deps);
+  assert.equal(result.status, 200);
+  assert.equal(result.payload.status, "saved");
+  assert.equal(fixture.state.records[0].closedAt, "2026-08-21 15:30:00");
+
+  fixture = services();
+  result = await evaluation.handleEvaluation(request({ closed_at: "2026/08/21 15:30:00" }), fixture.deps);
+  assert.equal(result.status, 400);
+  assert.equal(result.payload.error, "invalid_closed_at");
+  assert.match(result.payload.message, /DD\.MM\.YYYY HH:MM:SS/);
+
+  // 12f. Se a janela ajustada nao capturar mensagens humanas, o endpoint
   // tenta a janela bruta do payload antes de desistir.
   fixture = services({
     getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
