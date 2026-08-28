@@ -65,8 +65,10 @@ async function main() {
     getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
     listMessages: async () => [
       message({ text: "Resposta interna bloqueada", created: { id: "66345" }, fromUser: { id: "5531973239098", name: "Assessor Interno" } }),
-      message({ text: "Resposta da Yara", created: { id: "66345" }, fromUser: { id: "5531973239098", name: "Análise de crédito - Yara" } })
-    ]
+      message({ text: "Resposta da Yara", created: { id: "66345" }, fromUser: { id: "5531973239098", name: "Análise de crédito - Yara" } }),
+      message({ text: "Outra resposta bloqueada", created: { id: "message-author" }, fromUser: { id: "5531973239098", name: "5531973239098" } })
+    ],
+    evaluate: async () => ({ avaliavel: true, nota: 4, justificativa: "Atendimento válido; assessor interno 5531973239098 não deve aparecer." })
   });
   result = await evaluation.handleEvaluation(request({ closed_at: "2026-08-21T15:31:30.000Z" }), fixture.deps);
   assert.equal(result.payload.status, "saved");
@@ -74,6 +76,9 @@ async function main() {
   assert.equal(fixture.state.records.length, 1);
   assert.equal(fixture.state.records[0].responsibleName, "Análise de crédito - Yara");
   assert.ok(!fixture.state.records[0].capturedTexts.includes("5531973239098"));
+  assert.ok(!JSON.stringify(fixture.state.records).includes("5531973239098"));
+  assert.ok(!JSON.stringify(result.payload).includes("5531973239098"));
+  assert.deepEqual(result.payload.evaluated_employees, [{ responsible_name: "Análise de crédito - Yara", nota: 4 }]);
 
   fixture = services({
     getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
