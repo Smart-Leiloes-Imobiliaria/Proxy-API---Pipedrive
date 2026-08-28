@@ -139,8 +139,8 @@ Defina no ambiente Vercel, sem versionar segredos:
 - `CHATAPP_ACCESS_TOKEN`, `CHATAPP_ACCESS_TOKEN_END_TIME`;
 - `CHATAPP_REFRESH_TOKEN`, `CHATAPP_REFRESH_TOKEN_END_TIME`;
 - `CHATAPP_EVALUATION_BLOCK_INTERNAL_ASSESSOR`, opcional; quando `true`,
-  bloqueia avaliação e gravação de atendimentos do assessor interno configurado
-  no código;
+  bloqueia avaliação e gravação quando o recorte do atendimento contém o
+  assessor interno configurado no código;
 - `OPENAI_API_KEY`, `OPENAI_MODEL`, `EVALUATION_PROMPT_FILE`;
 - `GOOGLE_SHEETS_SPREADSHEET_ID`, `GOOGLE_SHEETS_SHEET_NAME`;
 - `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY`.
@@ -193,10 +193,10 @@ recorte filtrado usado pela IA, no formato `Autor - HH:MM - Texto`, uma
 mensagem por linha.
 A coluna `Origem` recebe somente `ChatApp` ou `Bitrix24`, derivados do campo
 `source` do payload.
-Quando `CHATAPP_EVALUATION_BLOCK_INTERNAL_ASSESSOR=true`, candidatos de
-avaliação identificados pelo telefone interno bloqueado ou pelo creator ID
-interno bloqueado são removidos antes da chamada à IA e antes da gravação no
-Sheets. Se todos os candidatos forem bloqueados, a rota retorna `not_evaluable`
+Quando `CHATAPP_EVALUATION_BLOCK_INTERNAL_ASSESSOR=true`, qualquer recorte de
+atendimento que contenha mensagem humana identificada pelo telefone interno
+bloqueado ou pelo creator ID interno bloqueado é barrado antes da chamada à IA
+e antes da gravação no Sheets. Nesses casos, a rota retorna `not_evaluable`
 com motivo `blocked_assessor`.
 A chamada Responses usa `store: false` e JSON Schema estrito para `avaliavel`,
 `nota` inteira de 1 a 5 e uma `justificativa` técnica de até 900 caracteres,

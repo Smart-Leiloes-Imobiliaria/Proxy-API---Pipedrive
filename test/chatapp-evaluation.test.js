@@ -51,7 +51,8 @@ async function main() {
   fixture = services({
     getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
     listMessages: async () => [
-      message({ text: "Resposta interna", created: { id: "66345" }, fromUser: { id: "5531973239098", name: "Assessor Interno" } })
+      message({ text: "Resposta interna", created: { id: "66345" }, fromUser: { id: "5531973239098", name: "Assessor Interno" } }),
+      message({ text: "Resposta de outro assessor", fromApp: { sender: { id: "agent-2", fullName: "Outra Pessoa" } } })
     ],
     evaluate: async () => { throw new Error("blocked assessor must not be evaluated"); }
   });
@@ -63,7 +64,7 @@ async function main() {
   fixture = services({
     getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
     listMessages: async () => [
-      message({ text: "Resposta interna", created: { id: "66345" }, fromUser: { id: "5531973239098", name: "Assessor Interno" } })
+      message({ text: "Resposta interna", fromUser: { id: "", name: "5531973239098" } })
     ]
   });
   result = await evaluation.handleEvaluation(request(), fixture.deps);
