@@ -193,10 +193,12 @@ mensagem por linha.
 A coluna `Origem` recebe somente `ChatApp` ou `Bitrix24`, derivados do campo
 `source` do payload.
 Quando `CHATAPP_EVALUATION_BLOCK_INTERNAL_ASSESSOR=true`, mensagens e candidatos
-identificados como o assessor interno bloqueado são removidos antes da chamada à
-IA e antes da gravação no Sheets. Outros responsáveis do mesmo recorte continuam
-avaliáveis normalmente. Se não sobrar nenhum responsável avaliável, a rota
-retorna `not_evaluable` com motivo `blocked_assessor`.
+cujo `created.id` seja exatamente `66345` são removidos antes da chamada à IA e
+antes da gravação no Sheets. O telefone presente em `fromUser` não é usado como
+critério de bloqueio, pois pode aparecer associado a outros assessores. Outros
+responsáveis do mesmo recorte continuam avaliáveis normalmente. Se não sobrar
+nenhum responsável avaliável, a rota retorna `not_evaluable` com motivo
+`blocked_assessor`.
 A chamada Responses usa `store: false` e JSON Schema estrito para `avaliavel`,
 `nota` inteira de 1 a 5 e uma `justificativa` técnica de até 900 caracteres,
 explicando acertos, erros identificados, impacto no cliente e motivo da nota.
