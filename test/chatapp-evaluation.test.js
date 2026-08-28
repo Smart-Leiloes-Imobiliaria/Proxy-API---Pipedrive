@@ -75,6 +75,22 @@ async function main() {
   assert.equal(result.payload.reason, "blocked_assessor");
   assert.equal(fixture.state.records.length, 0);
 
+  // 1c. O mesmo telefone pode aparecer em outro assessor; somente created.id
+  // decide o bloqueio e o nome vem do cadastro do employee.
+  fixture = services({
+    getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
+    getEmployee: async (id) => ({ data: { fullName: id === "99955" ? "Análise de crédito - Yara" : "" } }),
+    listMessages: async () => [
+      message({ text: "Resposta bloqueada", created: { id: "66345" }, fromUser: { id: "5531973239098", name: "5531973239098" } }),
+      message({ text: undefined, message: { text: "*Análise de crédito - Yara*\nResposta válida" }, created: { id: "99955" }, fromUser: { id: "5531973239098", name: "5531973239098" } })
+    ]
+  });
+  result = await evaluation.handleEvaluation(request({ closed_at: "2026-08-21T15:31:45.000Z" }), fixture.deps);
+  assert.equal(result.payload.status, "saved");
+  assert.equal(result.payload.responsible_name, "Análise de crédito - Yara");
+  assert.deepEqual(result.payload.evaluated_employees.map((item) => item.responsible_name), ["Análise de crédito - Yara"]);
+  assert.ok(!JSON.stringify(fixture.state.records).includes("5531973239098"));
+
   fixture = services({
     getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
     listMessages: async () => [
