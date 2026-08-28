@@ -45,6 +45,32 @@ async function main() {
   assert.equal(evaluation.normalizeEvaluationSource_("bitrix24"), "Bitrix24");
   assert.equal(evaluation.normalizeEvaluationSource_("helper_close"), "");
 
+  // 1b. Flag opcional bloqueia avaliacao/gravação do assessor interno.
+  const originalBlockInternalAssessor = process.env.CHATAPP_EVALUATION_BLOCK_INTERNAL_ASSESSOR;
+  process.env.CHATAPP_EVALUATION_BLOCK_INTERNAL_ASSESSOR = "true";
+  fixture = services({
+    getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
+    listMessages: async () => [
+      message({ text: "Resposta interna", created: { id: "66345" }, fromUser: { id: "5531973239098", name: "Assessor Interno" } })
+    ],
+    evaluate: async () => { throw new Error("blocked assessor must not be evaluated"); }
+  });
+  result = await evaluation.handleEvaluation(request(), fixture.deps);
+  assert.equal(result.payload.status, "not_evaluable");
+  assert.equal(result.payload.reason, "blocked_assessor");
+  assert.equal(fixture.state.records.length, 0);
+  process.env.CHATAPP_EVALUATION_BLOCK_INTERNAL_ASSESSOR = "false";
+  fixture = services({
+    getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
+    listMessages: async () => [
+      message({ text: "Resposta interna", created: { id: "66345" }, fromUser: { id: "5531973239098", name: "Assessor Interno" } })
+    ]
+  });
+  result = await evaluation.handleEvaluation(request(), fixture.deps);
+  assert.equal(result.payload.status, "saved");
+  if (originalBlockInternalAssessor == null) delete process.env.CHATAPP_EVALUATION_BLOCK_INTERNAL_ASSESSOR;
+  else process.env.CHATAPP_EVALUATION_BLOCK_INTERNAL_ASSESSOR = originalBlockInternalAssessor;
+
   // 2. Mais de 100 mensagens: o builder preserva todas as mensagens validas.
   const many = Array.from({ length: 101 }, (_, index) => message({ text: "Resposta " + index }));
   let transcript = evaluation.buildTranscript(many, { responsibleId: "agent-1", responsibleName: "Isaque Coelho", sessionClosedAt: CLOSED_AT });
