@@ -45,7 +45,7 @@ async function main() {
   assert.equal(evaluation.normalizeEvaluationSource_("bitrix24"), "Bitrix24");
   assert.equal(evaluation.normalizeEvaluationSource_("helper_close"), "");
 
-  // 1b. Flag opcional bloqueia avaliacao/gravação do assessor interno.
+  // 1b. Flag opcional bloqueia apenas o assessor interno, preservando outros responsaveis.
   const originalBlockInternalAssessor = process.env.CHATAPP_EVALUATION_BLOCK_INTERNAL_ASSESSOR;
   process.env.CHATAPP_EVALUATION_BLOCK_INTERNAL_ASSESSOR = "true";
   fixture = services({
@@ -53,10 +53,32 @@ async function main() {
     listMessages: async () => [
       message({ text: "Resposta interna", created: { id: "66345" }, fromUser: { id: "5531973239098", name: "Assessor Interno" } }),
       message({ text: "Resposta de outro assessor", fromApp: { sender: { id: "agent-2", fullName: "Outra Pessoa" } } })
+    ]
+  });
+  result = await evaluation.handleEvaluation(request(), fixture.deps);
+  assert.equal(result.payload.status, "saved");
+  assert.equal(result.payload.responsible_name, "Outra Pessoa");
+  assert.equal(fixture.state.records.length, 1);
+  assert.ok(!fixture.state.records[0].capturedTexts.includes("Resposta interna"));
+
+  fixture = services({
+    getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
+    listMessages: async () => [
+      message({ text: "Resposta da Yara", created: { id: "66345" }, fromUser: { id: "5531973239098", name: "Análise de crédito - Yara" } })
+    ]
+  });
+  result = await evaluation.handleEvaluation(request({ closed_at: "2026-08-21T15:31:30.000Z" }), fixture.deps);
+  assert.equal(result.payload.status, "saved");
+  assert.equal(result.payload.responsible_name, "Análise de crédito - Yara");
+
+  fixture = services({
+    getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
+    listMessages: async () => [
+      message({ text: "Resposta interna", created: { id: "66345" }, fromUser: { id: "5531973239098", name: "Assessor Interno" } })
     ],
     evaluate: async () => { throw new Error("blocked assessor must not be evaluated"); }
   });
-  result = await evaluation.handleEvaluation(request(), fixture.deps);
+  result = await evaluation.handleEvaluation(request({ closed_at: "2026-08-21T15:31:00.000Z" }), fixture.deps);
   assert.equal(result.payload.status, "not_evaluable");
   assert.equal(result.payload.reason, "blocked_assessor");
   assert.equal(fixture.state.records.length, 0);
