@@ -28,7 +28,7 @@ Accept: application/json
   "messenger_type": "{{messenger_type}}",
   "started_at": "{{started_at}}",
   "closed_at": "{{datetime}}",
-  "source": "helper_close"
+  "source": "chatapp"
 }
 ```
 
@@ -57,7 +57,7 @@ curl -i -X POST http://127.0.0.1:3001/api/chatapp/avaliar-atendimento \
     "license_id": "LICENSE_ID",
     "messenger_type": "grWhatsApp",
     "closed_at": "2026-08-24T18:30:00.000Z",
-    "source": "helper_close"
+    "source": "chatapp"
   }'
 ```
 
@@ -73,6 +73,9 @@ horário local enviado pelo ChatApp e depois passa pelo offset configurado em
 `CHATAPP_EVALUATION_TIME_OFFSET_HOURS`, mantendo compatibilidade com os fluxos
 que ainda enviam ISO.
 
+`source` é obrigatório e aceita apenas `chatapp` ou `bitrix24`; na planilha,
+esses valores são gravados como `ChatApp` e `Bitrix24`.
+
 Exemplo de chamada com o formato nativo do ChatApp:
 
 ```bash
@@ -85,7 +88,7 @@ curl -i -X POST http://127.0.0.1:3001/api/chatapp/avaliar-atendimento \
     "messenger_type": "caWhatsApp",
     "started_at": "27.08.2026 09:20:15",
     "closed_at": "27.08.2026 13:55:50",
-    "source": "helper_close"
+    "source": "chatapp"
   }'
 ```
 
@@ -102,7 +105,7 @@ curl -i -X POST http://127.0.0.1:3001/api/chatapp/avaliar-atendimento \
     "messenger_type": "grWhatsApp",
     "session_started_at": "2026-08-24T17:30:00.000Z",
     "closed_at": "2026-08-24T18:30:00.000Z",
-    "source": "helper_close"
+    "source": "chatapp"
   }'
 ```
 
@@ -113,6 +116,16 @@ Data inválida retorna erro de validação explícito:
   "success": false,
   "error": "invalid_closed_at",
   "message": "closed_at must be a valid date in ISO format or ChatApp format DD.MM.YYYY HH:MM:SS"
+}
+```
+
+Origem inválida retorna erro de validação:
+
+```json
+{
+  "success": false,
+  "error": "invalid_source",
+  "message": "source must be chatapp or bitrix24"
 }
 ```
 
@@ -135,7 +148,7 @@ como fallback legado. A conta de serviço deve ter acesso de **Editor** à
 planilha e o escopo Google Sheets API precisa estar habilitado no projeto dela.
 Crie a aba configurada já com os cabeçalhos, nesta ordem: `ChatID`, `Nome do
 Responsável`, `Horário`, `Nome do Cliente`, `Nota`, `Justificativa`,
-`Textos Captados` (A:G).
+`Textos Captados`, `Origem` (A:H).
 
 ## Contratos e proteção de dados
 
@@ -175,6 +188,8 @@ preserva mensagens humanas antes de concluir que não há atendimento avaliável
 A planilha também recebe a coluna `Textos Captados`, preenchida com o mesmo
 recorte filtrado usado pela IA, no formato `Autor - HH:MM - Texto`, uma
 mensagem por linha.
+A coluna `Origem` recebe somente `ChatApp` ou `Bitrix24`, derivados do campo
+`source` do payload.
 A chamada Responses usa `store: false` e JSON Schema estrito para `avaliavel`,
 `nota` inteira de 1 a 5 e uma `justificativa` técnica de até 900 caracteres,
 explicando acertos, erros identificados, impacto no cliente e motivo da nota.

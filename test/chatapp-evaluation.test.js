@@ -13,7 +13,7 @@ function request(overrides) {
   return {
     method: "POST",
     headers: { authorization: "Bearer test-token" },
-    body: JSON.stringify(Object.assign({ chat_id: "chat-1", license_id: "license-1", messenger_type: "whatsapp", closed_at: CLOSED_AT, source: "helper_close" }, overrides || {}))
+    body: JSON.stringify(Object.assign({ chat_id: "chat-1", license_id: "license-1", messenger_type: "whatsapp", closed_at: CLOSED_AT, source: "chatapp" }, overrides || {}))
   };
 }
 function message(overrides) {
@@ -41,6 +41,9 @@ async function main() {
   let result = await evaluation.handleEvaluation(request(), fixture.deps);
   assert.equal(result.status, 200); assert.equal(result.payload.status, "saved"); assert.equal(fixture.state.records.length, 1);
   assert.equal(fixture.state.records[0].capturedTexts, "CLIENTE - 12:00 - Preciso de ajuda\nIsaque Coelho - 12:00 - Boa tarde! No que posso ajudar?");
+  assert.equal(fixture.state.records[0].source, "ChatApp");
+  assert.equal(evaluation.normalizeEvaluationSource_("bitrix24"), "Bitrix24");
+  assert.equal(evaluation.normalizeEvaluationSource_("helper_close"), "");
 
   // 2. Mais de 100 mensagens: o builder preserva todas as mensagens validas.
   const many = Array.from({ length: 101 }, (_, index) => message({ text: "Resposta " + index }));
@@ -364,6 +367,7 @@ async function main() {
   result = await evaluation.handleEvaluation(Object.assign(request(), { headers: {} }), services().deps); assert.equal(result.status, 401);
   result = await evaluation.handleEvaluation(Object.assign(request(), { method: "GET" }), services().deps); assert.equal(result.status, 405);
   result = await evaluation.handleEvaluation(request({ chat_id: "" }), services().deps); assert.equal(result.status, 400);
+  result = await evaluation.handleEvaluation(request({ source: "helper_close" }), services().deps); assert.equal(result.status, 400); assert.equal(result.payload.error, "invalid_source");
   console.log("chatapp-evaluation: ok");
 }
 
