@@ -64,12 +64,16 @@ async function main() {
   fixture = services({
     getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
     listMessages: async () => [
+      message({ text: "Resposta interna bloqueada", created: { id: "66345" }, fromUser: { id: "5531973239098", name: "Assessor Interno" } }),
       message({ text: "Resposta da Yara", created: { id: "66345" }, fromUser: { id: "5531973239098", name: "Análise de crédito - Yara" } })
     ]
   });
   result = await evaluation.handleEvaluation(request({ closed_at: "2026-08-21T15:31:30.000Z" }), fixture.deps);
   assert.equal(result.payload.status, "saved");
   assert.equal(result.payload.responsible_name, "Análise de crédito - Yara");
+  assert.equal(fixture.state.records.length, 1);
+  assert.equal(fixture.state.records[0].responsibleName, "Análise de crédito - Yara");
+  assert.ok(!fixture.state.records[0].capturedTexts.includes("5531973239098"));
 
   fixture = services({
     getChat: async () => ({ data: { id: "chat-1", name: "Cliente", responsible: null } }),
