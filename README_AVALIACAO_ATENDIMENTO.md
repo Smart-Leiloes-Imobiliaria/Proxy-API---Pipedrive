@@ -148,9 +148,10 @@ Defina no ambiente Vercel, sem versionar segredos:
 modo preferencial para local e Vercel. `EVALUATION_PROMPT` permanece apenas
 como fallback legado. A conta de serviço deve ter acesso de **Editor** à
 planilha e o escopo Google Sheets API precisa estar habilitado no projeto dela.
-Crie a aba configurada já com os cabeçalhos, nesta ordem: `ChatID`, `Nome do
-Responsável`, `Horário`, `Nome do Cliente`, `Nota`, `Justificativa`,
-`Textos Captados`, `Origem` (A:H).
+Crie a aba configurada já com os cabeçalhos, nesta ordem: `ChatID`, `Link do
+Chat`, `Nome do Responsável`, `Horário`, `Nome do Cliente`, `Nota`,
+`Justificativa`, `Textos Captados`, `Origem` (A:I). O link ChatApp é construído
+com `license_id`, `messenger_type` e `chat_id` recebidos no request.
 
 ## Contratos e proteção de dados
 

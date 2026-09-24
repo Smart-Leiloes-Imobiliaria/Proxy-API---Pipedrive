@@ -25,7 +25,7 @@ function services(overrides) {
     getChat: async () => ({ data: { id: "chat-1", name: "Cliente Teste", responsible: { id: "agent-1" }, status: "closed" } }),
     getEmployee: async () => ({ data: { fullName: "Isaque Coelho" } }),
     listMessages: async () => [message({ side: "in", text: "Preciso de ajuda", fromApp: undefined }), message({ text: "Boa tarde! No que posso ajudar?" })],
-    listRecords: async () => state.records.map((record) => [record.chatId, record.responsibleName, record.closedAt, record.clientName, record.nota, record.justificativa || ""]),
+    listRecords: async () => state.records.map((record) => [record.chatId, record.chatLink || "", record.responsibleName, record.closedAt, record.clientName, record.nota, record.justificativa || ""]),
     evaluate: async () => { state.evaluated += 1; return { avaliavel: true, nota: 4 }; },
     hasRecord: async (chatId, closedAt) => state.records.some((record) => record.chatId === chatId && record.closedAt === closedAt),
     hasEvaluationRecord: async (chatId, closedAt, responsibleName) => state.records.some((record) => record.chatId === chatId && record.closedAt === closedAt && record.responsibleName === responsibleName),
@@ -42,6 +42,7 @@ async function main() {
   assert.equal(result.status, 200); assert.equal(result.payload.status, "saved"); assert.equal(fixture.state.records.length, 1);
   assert.equal(fixture.state.records[0].capturedTexts, "CLIENTE - 12:00 - Preciso de ajuda\nIsaque Coelho - 12:00 - Boa tarde! No que posso ajudar?");
   assert.equal(fixture.state.records[0].source, "ChatApp");
+  assert.equal(fixture.state.records[0].chatLink, "https://cabinet.chatapp.online/businesses/v2/products/dialogs#/dialogs/license-1/whatsapp/chat-1");
   assert.equal(evaluation.normalizeEvaluationSource_("bitrix24"), "Bitrix24");
   assert.equal(evaluation.normalizeEvaluationSource_("helper_close"), "");
 

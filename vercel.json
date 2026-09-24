@@ -18,8 +18,26 @@
     },
     "api/chatapp/avaliar-atendimento.mjs": {
       "maxDuration": 55
+    },
+    "api/bitrix/avaliar-atendimento.mjs": {
+      "maxDuration": 55
+    },
+    "api/bitrix/install.mjs": {
+      "maxDuration": 20
+    },
+    "api/bitrix/events.mjs": {
+      "maxDuration": 15
+    },
+    "api/bitrix/processar-fila.mjs": {
+      "maxDuration": 55
     }
   },
+  "crons": [
+    {
+      "path": "/api/bitrix/processar-fila",
+      "schedule": "15 3 * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/",
