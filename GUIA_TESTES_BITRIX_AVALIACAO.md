@@ -26,6 +26,11 @@ A aplicação anterior foi instalada e o binding apareceu como `bound`, mas
 nenhum job real de `OnSessionFinish` chegou antes de ela ser excluída. Assim, o
 binding técnico foi comprovado; a entrega do evento pelo `livechat` nativo não.
 
+No checkpoint de 24/09/2026, o novo deployment estava saudável, porém os
+`dry_run` de produção retornavam `wrong_client`: comportamento esperado porque
+as credenciais na Vercel ainda pertenciam à aplicação excluída. O registro da
+instalação antiga foi marcado como `pending` até a reinstalação.
+
 ## 2. Estratégia de gatilho
 
 Use `OnSessionFinish` nesta rodada como gatilho imediato de homologação, mas não
