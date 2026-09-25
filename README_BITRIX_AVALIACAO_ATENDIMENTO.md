@@ -154,6 +154,10 @@ O webhook completo é uma credencial. Guarde-o apenas no ambiente local/Vercel e
 considere rotacioná-lo após compartilhamento em canais de trabalho. O token
 interno deve ser diferente de `CHATAPP_INTERNAL_TOKEN`.
 
+As inclusões no Sheets usam a coluna `A` como âncora do `append`. Isso evita que
+o Google detecte como tabela somente o bloco `C:I` quando colunas históricas de
+link estão vazias e desloque o registro para `C:K`.
+
 Use `BITRIX_IGNORED_USER_IDS` somente para contas que sejam exclusivamente bots
 ou serviços. O usuário proprietário do webhook não deve ser ignorado apenas por
 ser proprietário; templates automáticos conhecidos já são excluídos pelo tipo e
