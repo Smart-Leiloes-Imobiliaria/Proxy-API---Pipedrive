@@ -102,6 +102,14 @@ antes de criar o job. A compatibilidade foi corrigida para aceitar também
 `eventId` e `event_id`; os próximos encerramentos devem responder HTTP 202 e
 criar um job idempotente por portal/sessão.
 
+Adicionalmente, implementou-se o **isolamento inteligente de atendimento recente**:
+quando o Bitrix24 reabre a mesma sessão ou acumula mensagens de dias/semanas
+anteriores no mesmo `SESSION_ID`, o parser detecta gaps de inatividade
+(`BITRIX_SESSION_MAX_GAP_HOURS`, default 4h) e marcos de encerramento (`Conversa fechada`,
+`Atendimento Encerrado`), isolando estritamente a conversa recém-encerrada.
+Com isso, operadores antigos de dias anteriores (ex: `Atendimento Smart Caixa - 9`)
+não são avaliados indevidamente e a OpenAI recebe apenas o diálogo do assessor atual.
+
 ## 5. Validação técnica antes das conversas
 
 Execute:

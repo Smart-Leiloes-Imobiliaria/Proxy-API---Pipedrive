@@ -117,6 +117,8 @@ BITRIX_IGNORED_USER_IDS=
 BITRIX_ALLOW_FORCE=false
 BITRIX_FETCH_TIMEOUT_MS=10000
 BITRIX_FETCH_RETRIES=2
+BITRIX_SESSION_MAX_GAP_HOURS=4
+BITRIX_ISOLATE_RECENT_ATTENDANCE=true
 BITRIX_EVAL_MAX_TRANSCRIPT_CHARS=12000
 BITRIX_EVALUATION_PROMPT_FILE=prompts/chatapp-evaluation.txt
 BITRIX_DEBUG=false
@@ -229,6 +231,13 @@ chat para diagnóstico.
   códigos longos, números de imóvel ou outros identificadores concatenados.
 - Anexos viram marcadores; nenhum arquivo é baixado.
 - O payload bruto e as URLs privadas de arquivo não são enviados ao modelo.
+- **Isolamento de Atendimento Recente**: em sessões longas ou reabertas pelo
+  Bitrix24 (quando a mesma `SESSION_ID` acumula conversas de dias anteriores),
+  o parser divide o histórico por gap de inatividade (`BITRIX_SESSION_MAX_GAP_HOURS`,
+  padrão 4h) e marcadores de encerramento (`Conversa fechada`, `Atendimento Encerrado`).
+  Apenas as mensagens do atendimento recente são enviadas à OpenAI e apenas o(s)
+  assessor(es) que participaram desse bloco são computados como candidatos a avaliação.
+  Isso economiza tokens, acelera a IA e impede distorções de notas com atendimentos passados.
 - A falha da avaliação não altera nem reabre a sessão do Bitrix24.
 
 ## Relação com a automação `webhook-jhonatan`
