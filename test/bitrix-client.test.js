@@ -37,6 +37,50 @@ async function main() {
   assert.deepEqual(await oauth.callMethod("portal-1", "profile", {}), { ok: true });
   assert.equal(installation.refresh_token, "refresh-new");
   assert.equal(calls.length, 3);
+
+  let proactiveInstallation = {
+    member_id: "portal-1",
+    client_endpoint: "https://portal.bitrix24.com.br/rest/",
+    server_endpoint: "https://oauth.bitrix.info/rest/",
+    access_token: "stale",
+    refresh_token: "refresh-stale",
+    expires_at: Date.now() - 1000
+  };
+  const proactiveCalls = [];
+  const proactive = createBitrixClient({
+    config: { clientId: "client", clientSecret: "secret", retries: 0, refreshSkewMs: 60000 },
+    installationRepository: {
+      getByMemberId: async () => proactiveInstallation,
+      updateTokens: async (_, tokens) => {
+        proactiveInstallation = Object.assign({}, proactiveInstallation, tokens);
+        return proactiveInstallation;
+      }
+    },
+    fetchImpl: async (url, options) => {
+      proactiveCalls.push({ url: String(url), body: options.body });
+      if (String(url).includes("oauth/token")) {
+        return { ok: true, status: 200, json: async () => ({ access_token: "fresh", refresh_token: "refresh-fresh", expires_in: 3600 }) };
+      }
+      assert.equal(JSON.parse(options.body).auth, "fresh");
+      return { ok: true, status: 200, json: async () => ({ result: { refreshed: true } }) };
+    }
+  });
+  assert.deepEqual(await proactive.callMethod("portal-1", "profile", {}), { refreshed: true });
+  assert.equal(proactiveCalls.length, 2);
+  assert.ok(proactiveCalls[0].url.includes("oauth/token"));
+  assert.equal(proactiveInstallation.refresh_token, "refresh-fresh");
+
+  const missingCredentials = createBitrixClient({
+    config: { clientId: "", clientSecret: "", retries: 0, refreshSkewMs: 60000 },
+    installationRepository: {
+      getByMemberId: async () => Object.assign({}, proactiveInstallation, { expires_at: Date.now() - 1000 }),
+      updateTokens: async () => { throw new Error("unexpected_update"); }
+    }
+  });
+  await assert.rejects(
+    () => missingCredentials.callMethod("portal-1", "profile", {}),
+    /bitrix_oauth_client_credentials_missing/
+  );
   console.log("ok bitrix-client");
 }
 

@@ -87,6 +87,15 @@ Depois que o Bitrix24 mostrar as novas credenciais:
 
 Nunca envie os valores das credenciais por chat, commit ou captura de tela.
 
+### Checkpoint de 25/09/2026
+
+A nova aplicação foi instalada com sucesso: o callback OAuth atualizou a
+instalação persistida, o binding está em `bound` e as credenciais/identificadores
+foram sincronizados no ambiente Production da Vercel. Os dry-runs remotos dos
+chats `64395` e `67331` voltaram a consultar o Bitrix normalmente. Permanece
+pendente apenas comprovar a entrega automática do `OnSessionFinish` com o
+encerramento de uma sessão humana nova.
+
 ## 5. Validação técnica antes das conversas
 
 Execute:

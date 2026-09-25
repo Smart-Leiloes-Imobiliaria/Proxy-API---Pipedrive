@@ -125,6 +125,7 @@ BITRIX_SINGLE_TENANT=true
 BITRIX_EXPECTED_MEMBER_ID=member_id_recebido_no_callback
 BITRIX_CLIENT_ID=
 BITRIX_CLIENT_SECRET=
+BITRIX_OAUTH_REFRESH_SKEW_MS=60000
 BITRIX_EVENT_HANDLER_URL=https://api-zendesk-vercel-proxy.vercel.app/api/bitrix/events
 BITRIX_ALLOWED_CONNECTORS=livechat
 CRON_SECRET=CONFIGURE_TOKEN_FORTE
@@ -140,6 +141,12 @@ da conta que criou o webhook. O webhook de entrada permanece apenas como
 fallback para uma instalação ainda não encontrada no repositório. Ao recriar a
 aplicação, compare novamente os dois valores locais com o callback; na retomada
 de 24/09/2026, o arquivo local ainda continha identificadores provisórios.
+
+O cliente OAuth renova o token preventivamente antes do vencimento, usando por
+padrão a margem de 60 segundos configurável em
+`BITRIX_OAUTH_REFRESH_SKEW_MS`. A resposta do Bitrix substitui de forma atômica
+os tokens cifrados e o novo vencimento no Supabase; a reação a
+`expired_token` permanece como contingência.
 
 O webhook completo é uma credencial. Guarde-o apenas no ambiente local/Vercel e
 considere rotacioná-lo após compartilhamento em canais de trabalho. O token
@@ -273,6 +280,7 @@ Referências oficiais: [OnSessionFinish](https://apidocs.bitrix24.com/api-refere
 npm run check
 ```
 
-A suíte cobre cliente REST, refresh OAuth simulado, transcript, PII, anexos,
+A suíte cobre cliente REST, refresh OAuth preventivo e reativo simulados,
+transcript, PII, anexos,
 allowlist, `dry_run`, idempotência, endpoint e toda a regressão do ChatApp. Não
 há chamadas reais a Bitrix24, OpenAI ou Google durante os testes.
