@@ -44,6 +44,16 @@ async function main() {
   result = await handleBitrixEvent({ method: "POST", body: JSON.stringify(eventBody()) }, { installationRepository: duplicateRepo });
   assert.equal(result.payload.duplicates, 2);
 
+  const handlerIdOnly = eventBody();
+  delete handlerIdOnly.eventId;
+  handlerIdOnly.event_handler_id = "79";
+  handlerIdOnly.data.DATA = [handlerIdOnly.data.DATA[1]];
+  result = await handleBitrixEvent({ method: "POST", body: JSON.stringify(handlerIdOnly) }, { installationRepository: repository });
+  assert.equal(result.status, 202);
+  assert.equal(result.payload.accepted, 1);
+  assert.equal(jobs.at(-1).event_id, 79);
+  assert.equal(jobs.at(-1).session_id, 252348);
+
   const invalid = eventBody(); invalid.auth.application_token = "wrong";
   result = await handleBitrixEvent({ method: "POST", body: JSON.stringify(invalid) }, { installationRepository: repository });
   assert.equal(result.status, 403);
@@ -55,7 +65,7 @@ async function main() {
   assert.equal(result.payload.status, "ignored");
 
   const form = new URLSearchParams();
-  form.set("event", "ONSESSIONFINISH"); form.set("eventId", "78");
+  form.set("event", "ONSESSIONFINISH"); form.set("event_handler_id", "78");
   form.set("auth[member_id]", "member-real"); form.set("auth[application_token]", "expected-token");
   form.set("data[DATA][0][connector][connector_id]", "livechat");
   form.set("data[DATA][0][connector][line_id]", "19");

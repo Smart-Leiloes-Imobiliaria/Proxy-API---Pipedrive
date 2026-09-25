@@ -89,6 +89,8 @@ Falhas retornam códigos estruturados sem tokens, URLs privadas ou payload bruto
   a instalação e reconcilia o binding `ONSESSIONFINISH`.
 - `POST /api/bitrix/events` — valida o `application_token`, percorre todos os
   itens de `data.DATA`, restringe ao chat autorizado e persiste antes do ACK.
+  O identificador aceita os formatos `eventId`, `event_id` e
+  `event_handler_id`, cobrindo os contratos específico e geral do Bitrix24.
 - `GET|POST /api/bitrix/processar-fila` — worker autenticado por `CRON_SECRET`;
   processa jobs pendentes, recupera jobs travados e aplica retry com backoff. O
   evento chama o mesmo domínio via `waitUntil`; o cron diário funciona como

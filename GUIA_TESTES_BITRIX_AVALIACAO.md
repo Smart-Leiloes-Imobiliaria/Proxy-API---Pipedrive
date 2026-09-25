@@ -96,6 +96,12 @@ chats `64395` e `67331` voltaram a consultar o Bitrix normalmente. Permanece
 pendente apenas comprovar a entrega automática do `OnSessionFinish` com o
 encerramento de uma sessão humana nova.
 
+Na primeira homologação do chat `67331`, o evento chegou à Vercel, mas o portal
+usou o identificador geral `event_handler_id` e o handler respondeu HTTP 400
+antes de criar o job. A compatibilidade foi corrigida para aceitar também
+`eventId` e `event_id`; os próximos encerramentos devem responder HTTP 202 e
+criar um job idempotente por portal/sessão.
+
 ## 5. Validação técnica antes das conversas
 
 Execute:
